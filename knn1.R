@@ -238,36 +238,44 @@ partition<-function(dataset1, dataset2, output){
 
 #par: the number of partitions or number of errors of one 1 shuffle
 
-
+		shuff = 3
+		par = 2
 	
 		for(s in 1:shuff){						#s: index of shuffles  
 		
 			partition<-matrix(NA,par,round(ncol(d1)/par)+1)
 		
-			i = 0									#i: holds the counter to traverse the d1
+			i = 1									#i: holds the counter to traverse the d1									
 		
 			for(p in 1:par){						#p: index of partitions or folds
+			
+			
 			
 				#storing p partitions in 1 array
 				if(p != par){
 				
 					for(q in 1:round(ncol(d1)/par)){				#q: index keeping track of contents of one 
 					
-						i = i + 1;							#increment i everytime it enters q 
+						
 					
 						partition[p,q]<-d1[s,i]
 						
+						i = i + 1;							#increment i everytime it exits q 
 					
+					
+						print(partition)
 					}
 				}
 				
 				else if(p == par && (ncol(d1)%%par)==0){
 				
-					for(q in 1:round(ncol(d1)/par)+1){
-					
-						i = i + 1;
+					for(q in 1:round(ncol(d1)/par)){
 					
 						partition[p,q]<-d1[s,i]
+						
+						i = i + 1;
+						
+						print(partition)
 					
 					}
 				
@@ -276,15 +284,18 @@ partition<-function(dataset1, dataset2, output){
 				
 				else if(p == par && (ncol(d1)%%par)!=0){							
 				
-					for(q in 1:round(ncol(d1)/par)+1){
-					
-						i = i + 1;
+					for(q in 1:(round(ncol(d1)/par)+1)){
 					
 						partition[p,q]<-d1[s,i]
+						
+						i = i + 1;
+						
+						print(partition)
 					
 					}
 					
 				}	
+				
 			
 			}
 			
@@ -300,152 +311,159 @@ partition<-function(dataset1, dataset2, output){
 			
 			#u: the counter for holding the no. of partitions
 			
-			for(u in 1:par){					
+		
+			
+			for(u in 1:par){	
 				
-				if(u!=par){
+				for(j in 1:length(partition[u,][!is.na(partition[u,])])){			
 					
-					e4<-matrix(NA,ncol(d1)-par,3)
-					
-				}
-				else if(u==par){
-					
-					e4<-matrix(NA,ncol(d1)-par,3)
-					
-				}
+					print(j)	
 				
+					e4<-matrix(NA,length(d1[1,])-length(partition[u,][!is.na(partition[u,])]),3)
 				
-				error<-matrix(0,1,l)
+					error<-matrix(0,1,l)
 				
-				#v: it'll traverse all elements of partition matrix which will be represented as seperate rows in e4 table
+					#v: it'll traverse all elements of partition matrix which will be represented as seperate rows in e4 table
 				
-				for(v in 1: length(partition[u,][!is.na(partition[u,])])){  
+					for(v in 1: nrow(partition) ){  
 					
-					#this 'if' will prevent the loop to calculate distance from target partition
+						#this 'if' will prevent the loop to calculate distance from target partition
 					
-					if(v!=u){	
+						if(v!=u){	
 															
 						
-						for(w in 1:ncol(e4)){
+							for(w in 1:length(partition[v,][!is.na(partition[v,])])){
 							
-							e4[k,1]<-e1[partition[v,w],1]		#contains example no.
-							e4[k,2]<-e1[partition[v,w],4]		#contains the 'y: value'of the example
-							e4[k,3]<-sqrt((w-as.integer(e1[partition[v,w],2]))*(w-as.integer(e1[partition[v,w],2]))+(w-as.integer(e1[partition[v,w],3]))*(w-as.integer(e1[partition[v,w],3])))										
+								e4[w,1]<-e1[partition[v,w],1]		#contains example no.
+								e4[w,2]<-e1[partition[v,w],4]		#contains the 'y: value'of the example
+								
+								xcor<-as.integer(e1[partition[u,j],2])-as.integer(e1[partition[v,w],2])
+								
+								
+								ycor<-as.integer(e1[partition[u,j],3])-as.integer(e1[partition[v,w],3])
+								
+								e4[w,3]<-sqrt( xcor*xcor +ycor*ycor)										
 																#contains distnce of + or - from every other given + or -
 					
 							
-						}
+							}
 					
-					}
-					
-					
-				
-				
-					# partition distance matrix is created and we are in "u" loop ie. partition loop
-				
-					e5<-e4
-				
-				
-				
-				
-					l = 5
-	
-					neighbors2<-matrix(NA,l,l)
-	
-					for(m in 1:l){				#m: row wise counter of target matrix
-					
-					
-						#cat("m=",m)
-					
-	
-						for(q in 1:m){				#q: column wise counter of target matrix
 						
-							min = 100
 						
-							#cat("q=",q)
+					
+					
+					
+				
+				
+						# partition distance matrix is created and we are in "u" loop ie. partition loop
+				
+						e5<-e4
+				
+				
+				
+				
+						l = 5
+	
+						neighbors2<-matrix(NA,l,l)
+	
+						for(m in 1:l){				#m: row wise counter of target matrix
+					
+					
+							#cat("m=",m)
+					
+	
+							for(q in 1:m){				#q: column wise counter of target matrix
 						
-							for(p in 1:nrow(e4)){		#p: column wise traversal of e2, the matrix holding distances
+								min = 100
+						
+								#cat("q=",q)
+						
+								for(p in 1:nrow(e4)){		#p: column wise traversal of e2, the matrix holding distances
 						
 		
-								if(as.integer(e4[p,3])< min){
+									if(as.integer(e4[p,3])< min){
 					
-									min = as.integer(e4[p,3])
+										min = as.integer(e4[p,3])
 								
-									index = p
+										index = p
 								
 								
 				
+									}
+							
+									if(as.integer(e4[p,3])==min && e4[p,2]=="-" ){
+								
+										min = as.integer(e4[p,3])
+								
+										index = p
+									
+										#p = p - 1
+								
+									}
+							
+									#print(p)
+							
+									neighbors2[m,q]<-e4[index,2]
 								}
+						
+								#print(min)
+								#print(index)
+								e4[index,3]<-1000
+						
+						
+						
+								#print(e2)
 							
-								if(as.integer(e4[p,3])==min && e4[p,2]=="-" ){
-								
-									min = as.integer(e4[p,3])
-								
-									index = p
-								
-									#p = p - 1
-								
-								}
+								print(neighbors2)
 							
-								#print(p)
-							
-								neighbors2[m,q]<-e4[index,2]
-							}
-						
-							#print(min)
-							#print(index)
-							e4[index,3]<-1000
-						
-						
-						
-							#print(e2)
-							
-							#print(neighbors2)
-							
-							#print(q)
-						}	
+								#print(q)
+							}	
 					
 					
 					
-						e4<-e5
+							e4<-e5
 					
-					}
-				
-				
-				
-					#updating the 5 matrices for l =1,2,3,4,5
-				
-					#selecting what the neighbor will be 
-				
-				
-					n_final<-matrix(0,1,l)
-				
-					wrong_class_ele<-matrix(0,1,nrow(n_final))
-				
-					# Calculated neighbors 
-				
-					for(m in 1:l){
-					
-						n_final[1,l]<-count(neighbors2[l,][!is.na(neighbors2[l,])])$x[which(count(neighbors2[l,][!is.na(neighbors2[l,])])$freq==max(count(neighbors2[l,][!is.na(neighbors2[l,])])$freq))][1]
-					
-					
-						if(as.character(n_final[1,l]) !=  e1[partition[u,v],4] ){
-						
-						wrong_class_ele[1,m]<-wrong_class_ele[1,m]+1
-						
 						}
+				
+				
+				
+						#updating the 5 matrices for l =1,2,3,4,5
+				
+						#selecting what the neighbor will be 
+				
+				
+						n_final<-matrix(0,1,l)
+				
+						wrong_class_ele<-matrix(0,1,ncol(n_final))
+				
+						# Calculated neighbors 
+				
+						for(m in 1:l){
+					
+							n_final[1,l]<-count(neighbors2[l,][!is.na(neighbors2[l,])])$x[which(count(neighbors2[l,][!is.na(neighbors2[l,])])$freq==max(count(neighbors2[l,][!is.na(neighbors2[l,])])$freq))][1]
 					
 					
+							if(as.character(n_final[1,l]) !=  e1[partition[u,v],4] ){
+						
+								wrong_class_ele[1,m]<-wrong_class_ele[1,m]+1
+						
+							}
+					
+					
+						}
+						#m ends here , we are in v			
+					  }#if ends here
 					}
-					#m ends here , we are in v			
+					#v ends here, we are in u
+			
+					#here error is Big 'E' 
+			
+					error<-error+wrong_class_ele/ncol(d1)
+					
+					print(error)
 			
 				}
-				#v ends here, we are in u
-			
-				#here error is Big 'E' 
-			
-				error<-error+wrong_class_ele/ncol(d1)
-			
-							
+				#j ends here			
 				
 			}
 			#u ends here, we are in 'shuff' starts
