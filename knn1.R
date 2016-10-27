@@ -7,7 +7,7 @@ partition<-function(dataset1, dataset2, output){
 	
 	dataset1<-"/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/f1.txt"	
 
-	dataset2<-"/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/f2_4.txt"
+	dataset2<-"/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/f2.txt"
 
 	install.packages("plyr")
 	install.packages("sqldf")
@@ -124,7 +124,7 @@ partition<-function(dataset1, dataset2, output){
 					
 				}
 				
-				#print(e2)
+				print(e2)
 				
 				#e3 is a copy of e2 used in loop m
 				
@@ -152,19 +152,18 @@ partition<-function(dataset1, dataset2, output){
 						for(p in 1:nrow(e2)){		#p: column wise traversal of e2, the matrix holding distances
 						
 		
-							if(as.integer(e2[p,3])< min){
+							if(as.numeric(e2[p,3])< min){
 					
-								min = as.integer(e2[p,3])
+								min = as.numeric(e2[p,3])
 								
 								index = p
-								
 								
 				
 							}
 							
-							if(as.integer(e2[p,3])==min && e2[p,2]=="-" ){
+							else if(as.numeric(e2[p,3])==min && e2[p,2]=="-" ){
 								
-								min = as.integer(e2[p,3])
+								min = as.numeric(e2[p,3])
 								
 								index = p
 								
@@ -172,18 +171,32 @@ partition<-function(dataset1, dataset2, output){
 								
 							}
 							
-							#print(p)
+							else if(as.numeric(e2[p,3])==min){
+								
+								min = as.numeric(e2[p,3])
+								
+								index = p
+								
+								#p = p - 1
+
+							}
 							
-							neighbors1[m,q]<-e2[index,2]
+							#print(p)
+							print(min)
+							
 						}
 						
 						#print(min)
 						#print(index)
+						
+						neighbors1[m,q]<-e2[index,2]
+						
+						
 						e2[index,3]<-1000
 						
 						
 						
-						#print(e2)
+						print(e2)
 							
 						#print(neighbors2)
 							
@@ -311,7 +324,8 @@ partition<-function(dataset1, dataset2, output){
 			
 			#u: the counter for holding the no. of partitions
 			
-		
+			error<-matrix(0,1,l)
+
 			
 			for(u in 1:par){	
 				
@@ -321,8 +335,7 @@ partition<-function(dataset1, dataset2, output){
 				
 					e4<-matrix(NA,length(d1[1,])-length(partition[u,][!is.na(partition[u,])]),3)
 				
-					error<-matrix(0,1,l)
-				
+									
 					#v: it'll traverse all elements of partition matrix which will be represented as seperate rows in e4 table
 				
 					for(v in 1: nrow(partition) ){  
@@ -381,9 +394,9 @@ partition<-function(dataset1, dataset2, output){
 								for(p in 1:nrow(e4)){		#p: column wise traversal of e2, the matrix holding distances
 						
 		
-									if(as.integer(e4[p,3])< min){
+									if(as.numeric(e4[p,3])< min){
 					
-										min = as.integer(e4[p,3])
+										min = as.numeric(e4[p,3])
 								
 										index = p
 								
@@ -391,14 +404,24 @@ partition<-function(dataset1, dataset2, output){
 				
 									}
 							
-									if(as.integer(e4[p,3])==min && e4[p,2]=="-" ){
+									else if(as.numeric(e4[p,3])==min && e4[p,2]=="-" ){
 								
-										min = as.integer(e4[p,3])
+										min = as.numeric(e4[p,3])
 								
 										index = p
 									
 										#p = p - 1
 								
+									}
+									
+									else if(as.numeric(e4[p,3]) == min){
+					
+										min = as.numeric(e4[p,3])
+								
+										index = p
+								
+								
+				
 									}
 							
 									#print(p)
@@ -440,25 +463,31 @@ partition<-function(dataset1, dataset2, output){
 				
 						for(m in 1:l){
 					
-							n_final[1,l]<-count(neighbors2[l,][!is.na(neighbors2[l,])])$x[which(count(neighbors2[l,][!is.na(neighbors2[l,])])$freq==max(count(neighbors2[l,][!is.na(neighbors2[l,])])$freq))][1]
+							n_final[1,m]<-as.character(count(neighbors2[m,][!is.na(neighbors2[m,])])$x[which(count(neighbors2[m,][!is.na(neighbors2[m,])])$freq==max(count(neighbors2[m,][!is.na(neighbors2[m,])])$freq))][1])
 					
-					
-							if(as.character(n_final[1,l]) !=  e1[partition[u,v],4] ){
+							print(n_final)
+							
+							if(n_final[1,m] !=  e1[partition[u,j],4] ){
 						
 								wrong_class_ele[1,m]<-wrong_class_ele[1,m]+1
+								
+								
 						
 							}
 					
 					
 						}
-						#m ends here , we are in v			
+						#m ends here , we are in v	
+						
+						error<-error + wrong_class_ele
+								
 					  }#if ends here
 					}
 					#v ends here, we are in u
 			
 					#here error is Big 'E' 
 			
-					error<-error+wrong_class_ele/ncol(d1)
+					
 					
 					print(error)
 			
@@ -468,11 +497,15 @@ partition<-function(dataset1, dataset2, output){
 			}
 			#u ends here, we are in 'shuff' starts
 			
-			error_final = error_final/shuff
+			error<-error/ncol(d1)
 
-		
+			error_final<-error_final+error
+			
+			
 		}
+		#Shuff ends here
 		
+		error_final = error_final/shuff
 		
 	
 	}
