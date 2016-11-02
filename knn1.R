@@ -1,14 +1,15 @@
 
 
 
-
-
-partition<-function(dataset1, dataset2, output){
-	
 	dataset1<-"/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/f1.txt"	
 
 	dataset2<-"/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/f2.txt"
 
+
+
+
+knn<-function(dataset1, dataset2, neighbors, shuffle, fold){
+	
 	install.packages("plyr")
 	install.packages("sqldf")
 	library("plyr")
@@ -124,7 +125,7 @@ partition<-function(dataset1, dataset2, output){
 					
 				}
 				
-				print(e2)
+				#print(e2)
 				
 				#e3 is a copy of e2 used in loop m
 				
@@ -133,7 +134,7 @@ partition<-function(dataset1, dataset2, output){
 				
 				
 				
-				l = 5
+				#l = 5
 	
 				neighbors1<-matrix(NA,l,l)
 	
@@ -182,7 +183,7 @@ partition<-function(dataset1, dataset2, output){
 							}
 							
 							#print(p)
-							print(min)
+							#print(min)
 							
 						}
 						
@@ -196,7 +197,7 @@ partition<-function(dataset1, dataset2, output){
 						
 						
 						
-						print(e2)
+						#print(e2)
 							
 						#print(neighbors2)
 							
@@ -223,11 +224,11 @@ partition<-function(dataset1, dataset2, output){
 				n4<-count(neighbors1[4,][!is.na(neighbors1[4,])])$x[which(count(neighbors1[4,][!is.na(neighbors1[4,])])$freq==max(count(neighbors1[4,][!is.na(neighbors1[4,])])$freq))]
 				n5<-count(neighbors1[5,][!is.na(neighbors1[5,])])$x[which(count(neighbors1[5,][!is.na(neighbors1[5,])])$freq==max(count(neighbors1[5,][!is.na(neighbors1[5,])])$freq))]
 				
-				print(n1)
-				print(n2)
-				print(n3)
-				print(n4)
-				print(n5)
+				#print(n1)
+				#print(n2)
+				#print(n3)
+				#print(n4)
+				#print(n5)
 				
 				d4[i,j]<-noquote(as.character(n1[1]))
 				d5[i,j]<-noquote(as.character(n2[1]))
@@ -251,8 +252,16 @@ partition<-function(dataset1, dataset2, output){
 
 #par: the number of partitions or number of errors of one 1 shuffle
 
-		shuff = 3
-		par = 2
+		shuff = shuffle
+		par = fold
+		l = neighbors
+		
+		error_final<-matrix(0,1,l)
+			
+		variance<-matrix(0,1,l)
+			
+		std_dev<-matrix(0,1,l)
+		
 	
 		for(s in 1:shuff){						#s: index of shuffles  
 		
@@ -276,7 +285,7 @@ partition<-function(dataset1, dataset2, output){
 						i = i + 1;							#increment i everytime it exits q 
 					
 					
-						print(partition)
+						#print(partition)
 					}
 				}
 				
@@ -288,7 +297,7 @@ partition<-function(dataset1, dataset2, output){
 						
 						i = i + 1;
 						
-						print(partition)
+						#print(partition)
 					
 					}
 				
@@ -303,7 +312,7 @@ partition<-function(dataset1, dataset2, output){
 						
 						i = i + 1;
 						
-						print(partition)
+						#print(partition)
 					
 					}
 					
@@ -314,7 +323,7 @@ partition<-function(dataset1, dataset2, output){
 			
 			#initializing final_error array
 			
-			error_final<-matrix(0,1,l)
+			
 			
 			
 			
@@ -331,7 +340,7 @@ partition<-function(dataset1, dataset2, output){
 				
 				for(j in 1:length(partition[u,][!is.na(partition[u,])])){			
 					
-					print(j)	
+					#print(j)	
 				
 					e4<-matrix(NA,length(d1[1,])-length(partition[u,][!is.na(partition[u,])]),3)
 				
@@ -437,7 +446,7 @@ partition<-function(dataset1, dataset2, output){
 						
 								#print(e2)
 							
-								print(neighbors2)
+								#print(neighbors2)
 							
 								#print(q)
 							}	
@@ -465,7 +474,7 @@ partition<-function(dataset1, dataset2, output){
 					
 							n_final[1,m]<-as.character(count(neighbors2[m,][!is.na(neighbors2[m,])])$x[which(count(neighbors2[m,][!is.na(neighbors2[m,])])$freq==max(count(neighbors2[m,][!is.na(neighbors2[m,])])$freq))][1])
 					
-							print(n_final)
+							#print(n_final)
 							
 							if(n_final[1,m] !=  e1[partition[u,j],4] ){
 						
@@ -489,7 +498,7 @@ partition<-function(dataset1, dataset2, output){
 			
 					
 					
-					print(error)
+					#print(error)
 			
 				}
 				#j ends here			
@@ -501,20 +510,51 @@ partition<-function(dataset1, dataset2, output){
 
 			error_final<-error_final+error
 			
+			variance = variance + (error_final-error)*(error_final-error)
+			
 			
 		}
+		
 		#Shuff ends here
 		
 		error_final = error_final/shuff
 		
+		std_dev = sqrt(variance)/shuff
+		
+		write.table(paste("error: ",error_final[1]),file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output1.txt",quote = FALSE, col.names = FALSE, row.names = FALSE)
 	
-	}
+		write.table(paste("std_dev: ",std_dev[1]),file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output1.txt",quote = FALSE, col.names = FALSE, row.names = FALSE, append = TRUE)
+		
+		write.table(d4,file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output1.txt",quote = FALSE, col.names = FALSE,row.names = FALSE, append = TRUE)
+		
+		
+		write.table(paste("error: ",error_final[2]),file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output2.txt",quote = FALSE,row.names = FALSE, col.names = FALSE, )
 	
+		write.table(paste("std_dev: ",std_dev[2]),file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output2.txt",quote = FALSE, col.names = FALSE,row.names = FALSE, append = TRUE)
+		
+		write.table(d5,file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output2.txt",quote = FALSE, col.names = FALSE, row.names = FALSE,append = TRUE)
+		
+		
+		write.table(paste("error: ",error_final[3]),file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output3.txt",quote = FALSE, col.names = FALSE,row.names = FALSE)
 	
+		write.table(paste("std_dev: ",std_dev[3]),file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output3.txt",quote = FALSE, col.names = FALSE, row.names = FALSE,append = TRUE)
+		
+		write.table(d6,file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output3.txt",quote = FALSE, col.names = FALSE, row.names = FALSE,append = TRUE)
+		
+		
+		write.table(paste("error: ",error_final[4]),file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output4.txt",quote = FALSE, col.names = FALSE, row.names = FALSE)
 	
+		write.table(paste("std_dev: ",std_dev[4]),file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output4.txt",quote = FALSE, col.names = FALSE,row.names = FALSE, append = TRUE)
+		
+		write.table(d7,file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output4.txt",quote = FALSE, col.names = FALSE, row.names = FALSE,append = TRUE)
+		
+		
+		write.table(paste("error: ",error_final[5]),file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output5.txt",quote = FALSE, col.names = FALSE, row.names = FALSE)
 	
+		write.table(paste("std_dev: ",std_dev[5]),file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output5.txt",quote = FALSE, col.names = FALSE, row.names = FALSE,append = TRUE)
+		
+		write.table(d8,file = "/Users/Dungeoun/Documents/Amit UTD Course Material/Machine Learning CS 6375 /KNN Cross Project/output5.txt",quote = FALSE, col.names = FALSE, row.names = FALSE,append = TRUE)
+
 	
-	
-	
-	
+	}	
 	
